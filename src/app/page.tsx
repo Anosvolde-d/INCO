@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Network, Key, Activity, Server, Copy, Check, Loader2, Eye, EyeOff, RefreshCw, Layers, ShieldAlert, X, Globe, History, Clock, Zap, PieChart as PieChartIcon, TrendingUp, Gauge, BarChart3, Play } from "lucide-react";
+import { Network, Key, Activity, Server, Copy, Check, Loader2, Eye, EyeOff, RefreshCw, Layers, ShieldAlert, X, Globe, History, Clock, Zap, PieChart as PieChartIcon, TrendingUp, Gauge, BarChart3, Play, ArrowRight } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
@@ -242,7 +242,11 @@ export default function Home() {
       </div>
       
       {/* Background Grid */}
-      <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="fixed inset-0 z-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+
+      {/* Decorative Glow */}
+      <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/20 blur-[120px] pointer-events-none z-0"></div>
+      <div className="fixed bottom-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none z-0"></div>
 
       {/* Admin Login Modal */}
       <AnimatePresence>
@@ -286,15 +290,15 @@ export default function Home() {
                                   onChange={(e) => setAdminPassword(e.target.value)}
                                   placeholder="Authorization token"
                                   autoComplete="new-password"
-                                  className="w-full bg-black border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/[0.2] transition-colors placeholder:text-zinc-600"
+                                  className="w-full bg-black/50 border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors placeholder:text-zinc-600 shadow-[0_0_10px_rgba(0,0,0,0.5)_inset]"
                               />
                           </div>
                           {adminError && <p className="text-red-400/80 text-[10px] uppercase tracking-wider font-medium">{adminError}</p>}
                           <button 
                               type="submit"
-                              className="w-full bg-white text-black hover:bg-zinc-200 font-medium py-2.5 text-sm rounded-lg transition-colors flex items-center justify-center gap-2"
+                              className="w-full btn-accent font-semibold py-2.5 text-sm rounded-lg flex items-center justify-center gap-2 icon-slide-group"
                           >
-                              Unlock
+                              Unlock <ArrowRight className="w-4 h-4 icon-slide transition-transform" />
                           </button>
                       </form>
                   </motion.div>
@@ -323,32 +327,43 @@ export default function Home() {
       <main className="flex-1 overflow-y-auto px-6 py-16 z-10 space-y-16 max-w-5xl mx-auto w-full">
         
         {/* Intro */}
-        <div className="space-y-4 max-w-2xl">
-            <motion.h2 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-4xl font-medium tracking-tight text-white"
-            >
-                Orchestration Gateway
-            </motion.h2>
-            <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="text-zinc-400 text-sm leading-relaxed"
-            >
-                Configure your external clients (SillyTavern, Agnai, TypingMind) to route through INCO. This proxy intercepts requests, injects dynamic context (Lorebooks & Web Search), and streams the response directly from the assigned upstream provider.
-            </motion.p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-4">
+            <div className="space-y-4 max-w-2xl">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium mb-2"
+                >
+                    <Zap className="w-3.5 h-3.5" />
+                    v1.0.0 Online
+                </motion.div>
+                <motion.h2 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-4xl md:text-5xl font-bold tracking-tight text-gradient-primary"
+                    style={{ letterSpacing: "-0.03em" }}
+                >
+                    Orchestration Gateway
+                </motion.h2>
+                <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="text-zinc-400 text-sm md:text-base leading-relaxed max-w-xl"
+                >
+                    Configure your external clients (SillyTavern, Agnai, TypingMind) to route through INCO. This proxy intercepts requests, injects dynamic context, and streams the response directly from the assigned upstream provider.
+                </motion.p>
+            </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
             
-            {/* Credentials Card - Full Width */}
+            {/* Credentials Card - 12 columns */}
             <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-[#0f0f0f] border border-white/[0.08] rounded-2xl p-8 shadow-2xl relative overflow-hidden"
+                className="lg:col-span-12 glass-panel rounded-2xl p-8"
             >
                 <div className="mb-6 flex justify-between items-start">
                     <div>
@@ -381,7 +396,7 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                     <div>
                         <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-2 block">Endpoint URL</label>
-                        <div className="flex items-center bg-black border border-white/[0.08] rounded-lg p-1 transition-colors hover:border-white/[0.15]">
+                            <div className="flex items-center bg-black/50 border border-white/[0.08] rounded-lg p-1 transition-colors hover:border-indigo-500/40 shadow-[0_0_10px_rgba(0,0,0,0.5)_inset]">
                             <code className="flex-1 px-3 text-zinc-300 text-xs font-mono">
                                 {`${origin}/v1`}
                             </code>
@@ -410,7 +425,7 @@ export default function Home() {
                         </div>
                         
                         {apiKey ? (
-                            <div className="flex items-center bg-black border border-white/[0.08] rounded-lg p-1 transition-colors hover:border-white/[0.15]">
+                        <div className="flex items-center bg-black/50 border border-white/[0.08] rounded-lg p-1 transition-colors hover:border-indigo-500/40 shadow-[0_0_10px_rgba(0,0,0,0.5)_inset]">
                                 <code className="flex-1 px-3 text-zinc-300 text-xs font-mono overflow-hidden text-ellipsis whitespace-nowrap">
                                     {showApiKey ? apiKey : 'sk-inco-••••••••••••••••••••••••••••••••'}
                                 </code>
@@ -435,9 +450,9 @@ export default function Home() {
                                 <button 
                                     onClick={generateNewKey}
                                     disabled={isGeneratingKey}
-                                    className="bg-white text-black hover:bg-zinc-200 font-medium rounded-md px-4 py-2 text-xs transition-colors flex items-center gap-2 mx-auto"
+                                    className="btn-accent rounded-md px-6 py-2.5 text-xs font-semibold flex items-center gap-2 mx-auto icon-slide-group"
                                 >
-                                    {isGeneratingKey ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Key className="w-3.5 h-3.5" />}
+                                    {isGeneratingKey ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Key className="w-3.5 h-3.5 icon-slide transition-transform" />}
                                     Create Key
                                 </button>
                             </div>
@@ -451,7 +466,7 @@ export default function Home() {
         {/* Available Models List */}
         <motion.div 
             variants={itemVariants}
-            className="bg-[#0f0f0f] border border-white/[0.08] rounded-2xl p-8 shadow-2xl relative overflow-hidden"
+            className="lg:col-span-12 glass-panel rounded-2xl p-8"
         >
             <div className="flex justify-between items-end mb-8 border-b border-white/[0.05] pb-4">
                 <div>
@@ -474,7 +489,7 @@ export default function Home() {
                      </div>
                 ) : (
                     models.map((model) => (
-                        <div key={model.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black border border-white/[0.05] rounded-xl hover:border-white/[0.15] transition-all">
+                        <div key={model.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black/40 border border-white/[0.05] rounded-xl hover:border-indigo-500/30 hover:bg-black/60 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.2)]">
                             <div className="mb-3 sm:mb-0">
                                 <div className="text-sm font-medium text-zinc-200">
                                     {model._inco.displayName}
@@ -513,7 +528,7 @@ export default function Home() {
         {/* Request History List */}
         <motion.div 
             variants={itemVariants}
-            className="bg-[#0f0f0f] border border-white/[0.08] rounded-2xl p-8 shadow-2xl relative overflow-hidden"
+            className="lg:col-span-12 glass-panel rounded-2xl p-8"
         >
             <div className="flex justify-between items-end mb-8 border-b border-white/[0.05] pb-4">
                 <div>
@@ -544,7 +559,7 @@ export default function Home() {
                         let usage: any = {}; try { usage = typeof log.tokenUsageJson === "string" ? JSON.parse(log.tokenUsageJson) : log.tokenUsageJson || {}; } catch(e){}
                         const avgResponseTime = log.executionMs ? Math.round(log.executionMs / 1000 * 10) / 10 : null;
                         return (
-                        <div key={log.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black border border-white/[0.05] rounded-xl hover:border-white/[0.15] transition-all group">
+                        <div key={log.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-black/40 border border-white/[0.05] rounded-xl hover:border-indigo-500/30 hover:bg-black/60 transition-all shadow-[0_4px_12px_rgba(0,0,0,0.2)] group">
                             <div className="mb-3 sm:mb-0 flex-1">
                                 <div className="text-sm font-medium text-zinc-200 flex items-center gap-2">
                                     {log.modelId}

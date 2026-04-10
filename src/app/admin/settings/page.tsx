@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Shield, Globe, Loader2, ExternalLink, Power, PowerOff } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Shield, Globe, Loader2, ExternalLink, Power, PowerOff, Activity } from "lucide-react";
 
 export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -13,6 +13,45 @@ export default function SettingsPage() {
   const [tunnelUrl, setTunnelUrl] = useState("");
   const [isTunnelLoading, setIsTunnelLoading] = useState(false);
   const [tunnelError, setTunnelError] = useState("");
+  
+  // Rate limits
+  const [rateLimitRPM, setRateLimitRPM] = useState<number>(5);
+  const [rateLimitRPD, setRateLimitRPD] = useState<number>(500);
+  const [isLoadingLimits, setIsLoadingLimits] = useState(true);
+  const [limitsMessage, setLimitsMessage] = useState("");
+  
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.settings) {
+          setRateLimitRPM(data.settings.rateLimitRPM);
+          setRateLimitRPD(data.settings.rateLimitRPD);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoadingLimits(false));
+  }, []);
+
+  const handleUpdateLimits = async () => {
+    setLimitsMessage("");
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rateLimitRPM, rateLimitRPD })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLimitsMessage("Rate limits updated successfully.");
+        setTimeout(() => setLimitsMessage(""), 3000);
+      } else {
+        setLimitsMessage(data.message || "Failed to update limits.");
+      }
+    } catch (e: any) {
+      setLimitsMessage("Network error updating limits.");
+    }
+  };
 
   const handleChangePassword = async () => {
     setPasswordError("");
@@ -129,6 +168,43 @@ export default function SettingsPage() {
               {isTunnelLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Power className="w-4 h-4" />}
               {isTunnelLoading ? "Starting Tunnel..." : "Start Cloudflare Tunnel"}
             </button>
+          </div>
+        )}
+      </div>
+
+      {/* Global Rate Limits */}
+      <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl p-6 shadow-xl">
+        <h3 className="text-base font-medium text-white flex items-center gap-2 mb-1">
+          <Activity className="w-4 h-4 text-zinc-400" /> Global Rate Limits
+        </h3>
+        <p className="text-xs text-zinc-500 mb-6">These base limits apply to all API keys that don't have custom overrides.</p>
+        
+        {isLoadingLimits ? (
+          <div className="flex items-center justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-zinc-600" /></div>
+        ) : (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-1.5 block">Requests Per Minute (RPM)</label>
+                <input type="number" min="1" value={rateLimitRPM} onChange={(e) => setRateLimitRPM(parseInt(e.target.value) || 1)}
+                  className="w-full bg-black border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-indigo-500/50 transition-colors" />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-1.5 block">Requests Per Day (RPD)</label>
+                <input type="number" min="1" value={rateLimitRPD} onChange={(e) => setRateLimitRPD(parseInt(e.target.value) || 1)}
+                  className="w-full bg-black border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-indigo-500/50 transition-colors" />
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.05]">
+              <p className={`text-xs ${limitsMessage.includes('error') || limitsMessage.includes('Failed') ? 'text-red-400' : 'text-emerald-400'}`}>
+                {limitsMessage}
+              </p>
+              <button onClick={handleUpdateLimits}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg px-4 py-2 text-sm transition-colors flex items-center gap-2">
+                Save Limits
+              </button>
+            </div>
           </div>
         )}
       </div>
