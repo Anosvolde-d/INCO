@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Provider {
+  id              String   @id @default(uuid())
+  name            String
+  baseUrl         String
+  apiKeyEncrypted String?
+  customHeaders   Json?    @default("{}")
+  models          Model[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Model {
+  providerId      String
+  providerModelId String
+  displayName     String         @id @unique
+  isPublic        Boolean        @default(true)
+  supportsVision  Boolean        @default(false)
+  supportsSearch  Boolean        @default(false)
+  tokenLimit      Int            @default(128000)
+  provider        Provider       @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  promptProfile   PromptProfile?
+  lorebooks       Lorebook[]
+  requestLogs     RequestLog[]
+  votesA          Vote[]         @relation("VoteModelA")
+  votesB          Vote[]         @relation("VoteModelB")
+  winners         Vote[]         @relation("VoteWinner")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model PromptProfile {
+  id                 String @id @default(uuid())
+  modelId            String @unique
+  mainPrompt         String @default("")
+  auxiliaryPrompt    String @default("")
+  postHistory        String @default("")
+  enhanceDefinitions String @default("")
+  contextTemplate    String @default("")
+  storyString        String @default("")
+  instructWrapper    String @default("")
+  injectionPosition  String @default("before_history") // "before_history", "after_main_prompt", etc.
+  injectionDepth     Int    @default(0)
+  positivePrompt     String @default("")
+  negativePrompt     String @default("")
+  guidanceJson       Json   @default("{}") // temperature, top_p, top_k, min_p, etc.
+  prefill            String @default("")
+  model              Model  @relation(fields: [modelId], references: [displayName], onDelete: Cascade)
+}
+
+model Lorebook {
+  id        String          @id @default(uuid())
+  name      String
+  isGlobal  Boolean         @default(false)
+  modelId   String?
+  model     Model?          @relation(fields: [modelId], references: [displayName], onDelete: SetNull)
+  entries   LorebookEntry[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model LorebookEntry {
+  id           String   @id @default(uuid())
+  lorebookId   String
+  title        String
+  keys         String[]
+  triggerType  String   @default("keyword") // "exact", "fuzzy", "keyword", "regex"
+  content      String
+  summary      String?
+  metadataJson Json?    @default("{}")
+  priority     Int      @default(0)
+  isPinned     Boolean  @default(false)
+  lorebook     Lorebook @relation(fields: [lorebookId], references: [id], onDelete: Cascade)
+}
+
+model SearchConfig {
+  id              String   @id @default(uuid())
+  provider        String   @unique // "exa" or "tavily"
+  apiKeys         String[] // Can store multiple keys for rotation (Tavily)
+  agentCorePrompt String
+  isActive        Boolean  @default(false)
+}
+
+model RequestLog {
+  id              String   @id @default(uuid())
+  timestamp       DateTime @default(now())
+  sessionId       String?
+  modelId         String
+  providerModelId String
+  searchUsed      Boolean  @default(false)
+  searchProvider  String?
+  tokenUsageJson  Json?    @default("{}")
+  errorCode       String?
+  executionMs     Int?
+  ttftMs          Int?
+  model           Model    @relation(fields: [modelId], references: [displayName], onDelete: Cascade)
+}
+
+model Vote {
+  id         String   @id @default(uuid())
+  modelAId   String
+  modelBId   String
+  winnerId   String
+  promptHash String
+  timestamp  DateTime @default(now())
+  modelA     Model    @relation("VoteModelA", fields: [modelAId], references: [displayName])
+  modelB     Model    @relation("VoteModelB", fields: [modelBId], references: [displayName])
+  winner     Model    @relation("VoteWinner", fields: [winnerId], references: [displayName])
+}
+
+model Settings {
+  id             String   @id @default("global")
+  rateLimitRPM   Int      @default(5)
+  rateLimitRPD   Int      @default(500)
+  updatedAt      DateTime @updatedAt
+}
+
+model ApiKey {
+  id             String    @id @default(uuid())
+  key            String    @unique
+  useSearch      Boolean   @default(true)
+  name           String    @default("Anonymous User")
+  avatarUrl      String?
+  isBlocked      Boolean   @default(false)
+  lastNameChange DateTime?
+  createdAt      DateTime  @default(now())
+}
